@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
-from dtb.settings import DEBUG
+from core.settings import DEBUG
 
 from tgbot.models import Location
 from tgbot.models import User

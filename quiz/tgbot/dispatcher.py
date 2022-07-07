@@ -13,8 +13,8 @@ from telegram.ext import (
     CallbackQueryHandler,
 )
 
-from dtb.celery import app  # event processing in async mode
-from dtb.settings import TELEGRAM_TOKEN, DEBUG
+from core.celery import app  # event processing in async mode
+from core.settings import TELEGRAM_TOKEN, DEBUG
 
 from tgbot.handlers.utils import files, error
 from tgbot.handlers.admin import handlers as admin_handlers
