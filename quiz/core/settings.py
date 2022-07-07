@@ -45,7 +45,8 @@ INSTALLED_APPS = [
 
     # local apps
     'tgbot.apps.TgbotConfig',
-    'question'
+    'question',
+    'exam'
 ]
 
 MIDDLEWARE = [

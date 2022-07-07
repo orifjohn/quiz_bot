@@ -22,7 +22,7 @@ class Question(models.Model):
 class QuestionOption(models.Model):
     title = models.CharField(max_length=256)
     is_correct = models.BooleanField(default=False)
-    questions = models.ForeignKey(Question, on_delete=models.CASCADE)
+    questions = models.ForeignKey(Question,related_name="options", on_delete=models.CASCADE)
 
 
 class Subject(models.Model):

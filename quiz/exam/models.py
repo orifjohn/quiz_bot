@@ -16,13 +16,15 @@ class Exam(models.Model):
     end_datetime = models.DateTimeField()
     duration = models.IntegerField("Imtixon vaqti (minut)", default=20)
 
+
 class UserExam(models.Model):
     exam = models.ForeignKey(Exam,on_delete=models.CASCADE)
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     score =models.IntegerField(default=0)
     start_datetime =models.DateTimeField(auto_now_add=True)
     end_datetime =models.DateTimeField(null=True)
-
+        
+        
 
 class UserExamAnswer(models.Model):
     option_ids = models.CharField(max_length=255)
