@@ -17,7 +17,7 @@ class Exam(models.Model):
 
     class Meta:
         verbose_name = "Imtixon"
-        verbose_name = "Imtixonlar"
+        verbose_name_plural = "Imtixonlar"
 
     def create_user_exam(self, user):
         userexam = UserExam.objects.create(exam=self, user=user)
@@ -29,10 +29,11 @@ class Exam(models.Model):
 class UserExam(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    questions = models.ManyToManyField(Question)# editable=False
+    questions = models.ManyToManyField(Question)  # editable=False
     score = models.IntegerField(default=0)
     start_datetime = models.DateTimeField(auto_now_add=True)
     end_datetime = models.DateTimeField(null=True)
+    is_finished = models.BooleanField(default=False)
 
     def create_answers(self):
         exam_answers = []
@@ -43,8 +44,11 @@ class UserExam(models.Model):
 
     def last_unanswered_question(self):
         user_exam_answer = self.answer.all().exclude(answered=True).first()
-        return user_exam_answer.question
+        return user_exam_answer.question if user_exam_answer else None
 
+    def last_unanswered(self):
+        user_exam_answer = self.answer.all().exclude(answered=True).first()
+        return user_exam_answer
 
 class UserExamAnswer(models.Model):
     user_answer = models.ForeignKey(
@@ -52,3 +56,4 @@ class UserExamAnswer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     option_ids = models.CharField(max_length=255, null=True)
     answered = models.BooleanField(default=False)
+    is_correct = models.BooleanField(default=False)

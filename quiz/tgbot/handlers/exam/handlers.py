@@ -5,9 +5,10 @@ from telegram.ext import CallbackContext
 
 from tgbot.handlers.exam import static_text
 from tgbot.models import User
-from exam.models import Exam
+from exam.models import Exam, UserExam
 from question.models import Question
 from tgbot.handlers.exam import keyboards
+from tgbot.handlers.exam import helpers
 
 
 def exam_start(update: Update, context: CallbackContext) -> None:
@@ -63,14 +64,28 @@ def exam_confirmation(update: Update, context: CallbackContext) -> None:
         query.delete_message()
         query.message.reply_text(
             static_text.exam_start_after_click, reply_markup=ReplyKeyboardRemove())
-        options = []
-        correct_option_id = 0
-        for index, option, in enumerate(question.options.all().order_by("?")):
-            options.append(option.title)
-            if option.is_correct:
-                correct_option_id = index
-        query.message.reply_poll(
-            question.title, options, type="quiz", correct_option_id=correct_option_id)
+
+        helpers.send_exam_poll(context, question, user.user_id)
 
     elif action_type == "back":
         exam_start(update, context)
+
+
+def poll_handler(update: Update, context: CallbackContext) -> None:
+    user_id = helpers.get_chat_id(update, context)
+    user = User.objects.get(user_id=user_id)
+    is_correct = False
+    for index, option in enumerate(update.poll.options):
+        if option.voter_count >= 1:
+            if index == update.poll.correct_option_id:
+                is_correct = True
+            break
+    user_exam = UserExam.objects.filter(user=user, is_finished=False).last()
+    answer_question = user_exam.last_unanswered()
+    answer_question.is_correct = is_correct
+    answer_question.answered = True
+    answer_question.save()
+
+    question = user_exam.last_unanswered_question()
+
+    helpers.send_exam_poll(context, question, user.user_id)
