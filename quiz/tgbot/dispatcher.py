@@ -42,8 +42,12 @@ def setup_dispatcher(dp):
 
     dp.add_handler(MessageHandler(Filters.text(
         onboarding_static_text.EXAM_TITLE), exam_handler.exam_start))
+
+    # EXAM HANDLERS
     dp.add_handler(CallbackQueryHandler(
         exam_handler.exam_callback, pattern=r"exam-start-"))
+    dp.add_handler(CallbackQueryHandler(
+        exam_handler.exam_confirmation, pattern=r"exam-confirmation-"))
 
     # handling errors
     dp.add_error_handler(error.send_stacktrace_to_tg_chat)
