@@ -43,17 +43,11 @@ def exam_callback(update: Update, context: CallbackContext) -> None:
         parse_mode=ParseMode.HTML,
         reply_markup=keyboards.exam_start_confirmation(exam)
     )
-    # query.delete_message()
-    # query.message.reply_text(
-    #     static_text.exam_start_after_click, reply_markup=ReplyKeyboardRemove())
-    # question = Question.objects.all().first()
-    # options = []
-    # for option in question.options.all():
-    #     options.append(option.title)
-    # query.message.reply_poll(question.title, options, correct_option_id=1)
 
 
 def exam_confirmation(update: Update, context: CallbackContext) -> None:
+    user, _ = User.get_user_and_created(update, context)
+
     query = update.callback_query
     data = update.callback_query.data.split("-")
     exam_id = data[2]
@@ -61,13 +55,22 @@ def exam_confirmation(update: Update, context: CallbackContext) -> None:
 
     query.answer()
     if action_type == "start":
-        """
-        TODO:
-            - UserExam create
-            - UserExam Question random
-            - Get Random Questions
-            - Send first question
-        """
+        exam = Exam.objects.get(id=exam_id)
+        user_exam = exam.create_user_exam(user)
+        user_exam.create_answers()
+        question = user_exam.last_unanswered_question()
+
+        query.delete_message()
+        query.message.reply_text(
+            static_text.exam_start_after_click, reply_markup=ReplyKeyboardRemove())
+        options = []
+        correct_option_id = 0
+        for index, option, in enumerate(question.options.all().order_by("?")):
+            options.append(option.title)
+            if option.is_correct:
+                correct_option_id = index
+        query.message.reply_poll(
+            question.title, options, type="quiz", correct_option_id=correct_option_id)
 
     elif action_type == "back":
         exam_start(update, context)
