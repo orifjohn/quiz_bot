@@ -72,20 +72,25 @@ def exam_confirmation(update: Update, context: CallbackContext) -> None:
 
 
 def poll_handler(update: Update, context: CallbackContext) -> None:
+    # GETTING USER 
     user_id = helpers.get_chat_id(update, context)
     user = User.objects.get(user_id=user_id)
+    
+    # CHECKING ANSWER
     is_correct = False
     for index, option in enumerate(update.poll.options):
         if option.voter_count >= 1:
             if index == update.poll.correct_option_id:
                 is_correct = True
             break
+        
+    # SAVE ANSWER
     user_exam = UserExam.objects.filter(user=user, is_finished=False).last()
     answer_question = user_exam.last_unanswered()
     answer_question.is_correct = is_correct
     answer_question.answered = True
     answer_question.save()
-
+    
     question = user_exam.last_unanswered_question()
 
     helpers.send_exam_poll(context, question, user.user_id)
