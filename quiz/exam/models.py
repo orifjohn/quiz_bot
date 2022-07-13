@@ -35,6 +35,10 @@ class UserExam(models.Model):
     end_datetime = models.DateTimeField(null=True)
     is_finished = models.BooleanField(default=False)
 
+    def update_score(self):
+        UserExam.objects.filter(id=self.id).update(
+            score=UserExamAnswer.objects.filter(is_correct=True, user_answer=self).count())
+
     def create_answers(self):
         exam_answers = []
         for question in self.questions.all().order_by("?"):
@@ -49,6 +53,7 @@ class UserExam(models.Model):
     def last_unanswered(self):
         user_exam_answer = self.answer.all().exclude(answered=True).first()
         return user_exam_answer
+
 
 class UserExamAnswer(models.Model):
     user_answer = models.ForeignKey(

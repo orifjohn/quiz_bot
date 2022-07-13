@@ -9,6 +9,8 @@ from exam.models import Exam, UserExam
 from question.models import Question
 from tgbot.handlers.exam import keyboards
 from tgbot.handlers.exam import helpers
+from tgbot.handlers import onboarding
+from tgbot.handlers.onboarding.keyboards import make_keyboard_for_start_command
 
 
 def exam_start(update: Update, context: CallbackContext) -> None:
@@ -72,10 +74,10 @@ def exam_confirmation(update: Update, context: CallbackContext) -> None:
 
 
 def poll_handler(update: Update, context: CallbackContext) -> None:
-    # GETTING USER 
+    # GETTING USER
     user_id = helpers.get_chat_id(update, context)
     user = User.objects.get(user_id=user_id)
-    
+
     # CHECKING ANSWER
     is_correct = False
     for index, option in enumerate(update.poll.options):
@@ -83,14 +85,20 @@ def poll_handler(update: Update, context: CallbackContext) -> None:
             if index == update.poll.correct_option_id:
                 is_correct = True
             break
-        
+
     # SAVE ANSWER
     user_exam = UserExam.objects.filter(user=user, is_finished=False).last()
     answer_question = user_exam.last_unanswered()
     answer_question.is_correct = is_correct
     answer_question.answered = True
     answer_question.save()
-    
-    question = user_exam.last_unanswered_question()
 
-    helpers.send_exam_poll(context, question, user.user_id)
+    user_exam.update_score()
+    user_exam = UserExam.objects.filter(user=user, is_finished=False).last()
+
+    question = user_exam.last_unanswered_question()
+    if question:
+        helpers.send_exam_poll(context, question, user.user_id)
+    else:
+        context.bot.send_message(
+            user_id, f"Imtixon tugadi.\n\nSizning natijangiz: {user_exam.score}", reply_markup=make_keyboard_for_start_command())
