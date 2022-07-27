@@ -8,4 +8,4 @@ secret_level_button_text = "Secret level🗝"
 
 
 EXAM_TITLE = "Imtixon ⏳"
-BATTLE_TITLE = "Battle ⚔"
+BATTLE_TITLE = "Leaderboard"

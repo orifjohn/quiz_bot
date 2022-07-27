@@ -102,3 +102,10 @@ def poll_handler(update: Update, context: CallbackContext) -> None:
     else:
         context.bot.send_message(
             user_id, f"Imtixon tugadi.\n\nSizning natijangiz: {user_exam.score}", reply_markup=make_keyboard_for_start_command())
+
+
+def leaderboard(update: Update, context: CallbackContext) -> None:
+    user_exam = UserExam.objects.all().order_by("-score")
+    for i in user_exam:
+        text = f"ism: {i.user} {i.exam.title} {i.score}"
+        update.message.reply_text(text)
